@@ -14,11 +14,9 @@ import (
 func main() {
 
 	l := log.New(os.Stdout, "Product-API", log.LstdFlags)
-	hh := handlers.NewHello(l)
-	gh := handlers.NewBye(l)
+	ph := handlers.NewProduct(l)
 	mux := http.NewServeMux()
-	mux.Handle("/goodbye", gh)
-	mux.Handle("/", hh)
+	mux.Handle("/", ph)
 
 	server := &http.Server{
 		Addr:         ":8080",
