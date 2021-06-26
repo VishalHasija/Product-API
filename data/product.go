@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"time"
 )
@@ -39,6 +40,28 @@ func GetProducts() Products {
 func AddProducts(prod *Product) {
 	prod.ID = getID()
 	products = append(products, prod)
+}
+
+func UpdateProduct(id int, prod *Product) error {
+	idxInDB, err := findProduct(id)
+	if err != nil {
+		return err
+	}
+	prod.ID = id
+	products[idxInDB] = prod
+	return nil
+
+}
+
+var ErrorProductNotListed = errors.New("Product not listed in Database")
+
+func findProduct(id int) (int, error) {
+	for idx, product := range products {
+		if product.ID == id {
+			return idx, nil
+		}
+	}
+	return 0, ErrorProductNotListed
 }
 
 func getID() int {
