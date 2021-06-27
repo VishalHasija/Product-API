@@ -31,12 +31,7 @@ func (p *Product) GetProducts(rw http.ResponseWriter, r *http.Request) {
 
 func (p *Product) AddProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle POST Request")
-	prod := data.NewProduct()
-	err := prod.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Error Decoding Data", http.StatusBadRequest)
-		return
-	}
+	prod := r.Context().Value(KeyProduct{}).(*data.Product)
 	data.AddProducts(prod)
 	rw.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(rw, "Product successfully added")
