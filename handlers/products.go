@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/VishalHasija/Product-API.git/data"
+	"github.com/gorilla/mux"
 )
 
 type Product struct {
@@ -16,22 +16,6 @@ type Product struct {
 
 func NewProduct(l *log.Logger) *Product {
 	return &Product{l}
-}
-
-func (p *Product) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		p.GetProducts(rw, r)
-		return
-	}
-	if r.Method == http.MethodPost {
-		p.AddProducts(rw, r)
-		return
-	}
-	if r.Method == http.MethodPut {
-		p.UpdateProduct(rw, r)
-		return
-	}
-	rw.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func (p *Product) GetProducts(rw http.ResponseWriter, r *http.Request) {
@@ -60,22 +44,10 @@ func (p *Product) AddProducts(rw http.ResponseWriter, r *http.Request) {
 
 func (p *Product) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle PUT Request")
-	path := r.URL.Path
-	reg := regexp.MustCompile("/([0-9]+)")
-	g := reg.FindAllStringSubmatch(path, -1)
-	p.l.Println(g)
-	if len(g) != 1 {
-		p.l.Println("Invalid URI more than 1 ID")
-		http.Error(rw, "Invalid URL ID", http.StatusBadRequest)
-		return
-	}
-	p.l.Println(g[0], " Capture group")
-	if len(g[0]) != 2 {
-		p.l.Println("Invalid URL more than one capture group")
-		http.Error(rw, "Invalid URL ID", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.Atoi(g[0][1])
+	vars := mux.Vars(r)
+	idString := vars["id"]
+
+	id, err := strconv.Atoi(idString)
 	if err != nil {
 		http.Error(rw, "Invalid URL ID unable to convert to number", http.StatusBadRequest)
 		return

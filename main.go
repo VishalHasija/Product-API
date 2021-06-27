@@ -9,18 +9,27 @@ import (
 	"time"
 
 	"github.com/VishalHasija/Product-API.git/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
 
 	l := log.New(os.Stdout, "Product-API", log.LstdFlags)
 	ph := handlers.NewProduct(l)
-	mux := http.NewServeMux()
-	mux.Handle("/", ph)
+	r := mux.NewRouter()
+
+	getRouter := r.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", ph.GetProducts)
+
+	postRouter := r.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", ph.AddProducts)
+
+	putRouter := r.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
 
 	server := &http.Server{
 		Addr:         ":8080",
-		Handler:      mux,
+		Handler:      r,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
 	}
