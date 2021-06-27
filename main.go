@@ -23,9 +23,11 @@ func main() {
 
 	postRouter := r.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", ph.AddProducts)
+	postRouter.Use(ph.MiddlewareJSONValidation)
 
 	putRouter := r.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putRouter.Use(ph.MiddlewareJSONValidation)
 
 	server := &http.Server{
 		Addr:         ":8080",

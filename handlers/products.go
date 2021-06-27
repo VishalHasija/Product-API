@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -52,17 +53,27 @@ func (p *Product) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Invalid URL ID unable to convert to number", http.StatusBadRequest)
 		return
 	}
-
-	prod := data.NewProduct()
-	err = prod.FromJSON(r.Body)
-	if err != nil {
-		http.Error(rw, "Error Decoding Data", http.StatusBadRequest)
-		return
-	}
+	prod := r.Context().Value(KeyProduct{}).(*data.Product)
 	err = data.UpdateProduct(id, prod)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
 	rw.WriteHeader(http.StatusAccepted)
+}
+
+type KeyProduct struct{}
+
+func (p *Product) MiddlewareJSONValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		prod := data.NewProduct()
+		err := prod.FromJSON(r.Body)
+		if err != nil {
+			http.Error(rw, "Error Decoding Data", http.StatusBadRequest)
+			return
+		}
+		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
+		req := r.WithContext(ctx)
+		next.ServeHTTP(rw, req)
+	})
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"time"
 )
 
@@ -29,6 +30,7 @@ func (p *Products) ToJSON(w io.Writer) error {
 }
 
 func (p *Product) FromJSON(r io.Reader) error {
+	log.Println("JSON Decoding....")
 	d := json.NewDecoder(r)
 	return d.Decode(p)
 }
